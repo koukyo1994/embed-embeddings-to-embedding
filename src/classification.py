@@ -58,6 +58,7 @@ if __name__ == "__main__":
     trainer = NNTrainer(
         NeuralNet,
         logger,
+        device=args.device,
         kwargs={
             "embedding_matrix": embedding_matrix,
             "n_classes": 9,
