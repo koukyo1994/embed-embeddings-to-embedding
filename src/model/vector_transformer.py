@@ -84,7 +84,7 @@ def embedding_expander(source, target, logger):
 
     logger.info(f"Creating loader...")
     loader = create_loader(intersection, source, target, "cpu")
-    model = VectorTransformer(source.vecor_size, target.vector_size)
+    model = VectorTransformer(source.vector_size, target.vector_size)
     model.to("cpu")
     optimizer = optim.Adam(model.parameters())
     loss_fn = nn.MSELoss()
@@ -103,10 +103,10 @@ def embedding_expander(source, target, logger):
         logger.info(f"Epoch {i + 1} avg_loss: {avg_loss:.4f}")
         source_only_words = source_words - intersection
 
-        expanded_embedding = dict()
-        for word in source_only_words:
-            emb = source.get_vector(word)
-            tensor = torch.tensor(emb, dtype=torch.float32).to("cpu")
-            pred = model(tensor).detach().numpy()
-            expanded_embedding[word] = pred
-        return expanded_embedding
+    expanded_embedding = dict()
+    for word in source_only_words:
+        emb = source.get_vector(word)
+        tensor = torch.tensor(emb, dtype=torch.float32).to("cpu")
+        pred = model(tensor).detach().numpy()
+        expanded_embedding[word] = pred
+    return expanded_embedding
