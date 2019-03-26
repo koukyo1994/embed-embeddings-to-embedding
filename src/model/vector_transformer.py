@@ -36,7 +36,7 @@ class RandomVectorTransformer:
                 for (x_batch, y_batch) in dataloader:
                     y_pred = model(x_batch)
 
-                    if loss_fn == nn.MSELoss:
+                    if loss_fn == nn.CosineEmbeddingLoss:
                         dummy = torch.ones((y_batch.size(0), ))
                         loss = loss_fn(y_pred, y_batch, dummy)
                     else:
@@ -87,15 +87,16 @@ def embedding_expander(source, target, logger):
     model = VectorTransformer(source.vector_size, target.vector_size)
     model.to("cpu")
     optimizer = optim.Adam(model.parameters())
-    loss_fn = nn.MSELoss()
+    loss_fn = nn.CosineEmbeddingLoss()
 
     logger.info(f"Training Vector Transformer...")
-    for i in range(3):
+    for i in range(20):
         model.train()
         avg_loss = 0.
         for (x_batch, y_batch) in loader:
             y_pred = model(x_batch)
-            loss = loss_fn(y_pred, y_batch)
+            dummy = torch.ones((y_batch.size(0), ))
+            loss = loss_fn(y_pred, y_batch, dummy)
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()

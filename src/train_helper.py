@@ -44,6 +44,7 @@ def prepare_emb(word_index, base_w2v, expanded_w2v, max_features=95000):
                                         (n_words + 1, embed_size))
     in_base = 0
     in_expanded = 0
+    expanded_words = []
     for word, i in word_index.items():
         if i >= max_features:
             continue
@@ -56,10 +57,10 @@ def prepare_emb(word_index, base_w2v, expanded_w2v, max_features=95000):
                 embedding_vector = expanded_w2v[word]
                 embedding_matrix[i] = embedding_vector
                 in_expanded += 1
+                expanded_words.append(word)
             except KeyError:
                 pass
-
-    return embedding_matrix, in_base, in_expanded
+    return embedding_matrix, in_base, in_expanded, expanded_words
 
 
 def load_w2v(word_index, filepath, max_features=95000):

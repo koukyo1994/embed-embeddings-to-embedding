@@ -1,3 +1,4 @@
+import re
 import sys
 import time
 import logging
@@ -44,3 +45,12 @@ def check_format(path):
         return True
     else:
         return False
+
+
+def count_words_in_expanded_words(x: list, expanded: set):
+    x_set = set(x)
+    intersection = x_set.intersection(expanded)
+    count = 0
+    for word in intersection:
+        count += len(re.findall(re.escape(word), " ".join(x)))
+    return count

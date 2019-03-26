@@ -79,6 +79,8 @@ class NNTrainer(Trainer):
         self.path = path
         self.scores = {}
         self.f1s = {}
+        self.loss = {}
+        self.loss_val = {}
 
     def _fit(self, X_train, y_train, n_epochs=50, eval_set=()):
         seed_torch()
@@ -106,6 +108,8 @@ class NNTrainer(Trainer):
         best_score = -np.inf
         epoch_score = []
         epoch_f1 = []
+        epoch_loss = []
+        epoch_val_loss = []
 
         for epoch in range(n_epochs):
             with timer(f"Epoch {epoch+1}/{n_epochs}", self.logger):
@@ -129,6 +133,8 @@ class NNTrainer(Trainer):
                     average="macro")
                 epoch_score.append(score)
                 epoch_f1.append(f1)
+                epoch_loss.append(avg_loss)
+                epoch_val_loss.append(avg_val_loss)
             self.logger.info(
                 f"loss: {avg_loss:.4f} val_loss: {avg_val_loss:.4f}")
             self.logger.info(f"val_acc: {score} val_f1: {f1}")
@@ -144,6 +150,8 @@ class NNTrainer(Trainer):
         self.logger.info(f"Validation loss: {avg_val_loss}")
         self.scores[self.fold] = epoch_score
         self.f1s[self.fold] = epoch_f1
+        self.loss[self.fold] = epoch_loss
+        self.loss_val[self.fold] = epoch_val_loss
         return valid_preds
 
     def _val(self, loader, model):
