@@ -147,6 +147,14 @@ if __name__ == "__main__":
 
     test_preds = trainer.predict(X_test)
     score = accuracy_score(y_test.values, np.argmax(test_preds, axis=1))
-    f1 = f1_score(y_test.values, np.argmax(test_preds, axis=1))
-    logger.info(f"Test Acc: {score}")
-    logger.info(f"Test f1: {f1}")
+    f1 = f1_score(
+        y_test.values, np.argmax(test_preds, axis=1), average="macro")
+    logger.info(f"Test Acc fastText: {score}")
+    logger.info(f"Test f1 fastText: {f1}")
+
+    test_preds = trainer_ex.predict(X_test)
+    score = accuracy_score(y_test.values, np.argmax(test_preds, axis=1))
+    f1 = f1_score(
+        y_test.values, np.argmax(test_preds, axis=1), average="macro")
+    logger.info(f"Test Acc expanded: {score}")
+    logger.info(f"Test f1 expanded: {f1}")
