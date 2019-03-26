@@ -122,7 +122,7 @@ if __name__ == "__main__":
             "linear_size": 100,
             "n_attention": 50
         })
-    trainer_ex.fit(X, y.values, 30)
+    trainer_ex.fit(X, y.values, 20)
 
     path = Path(f"figure/{trainer.tag}")
     path.mkdir(parents=True, exist_ok=True)
@@ -130,17 +130,17 @@ if __name__ == "__main__":
     idx = np.arange(len(trainer.f1s[0]))
     for i in range(trainer.n_splits):
         plt.figure()
-        plt.plot(idx, trainer.scores[i], label="Accuracy fastText")
+        plt.plot(idx, trainer.scores[i], label="Accuracy")
         plt.plot(idx, trainer_ex.scores[i], label="Accuracy expanded")
-        plt.plot(idx, trainer.f1s[i], label="F1 fastText")
+        plt.plot(idx, trainer.f1s[i], label="F1")
         plt.plot(idx, trainer_ex.f1s[i], label="F1 expanded")
         plt.legend()
         plt.savefig(path / f"score{i}.png")
 
         plt.figure()
-        plt.plot(idx, trainer.loss[i], label="Train Loss fastText")
+        plt.plot(idx, trainer.loss[i], label="Train Loss")
         plt.plot(idx, trainer_ex.loss[i], label="Train Loss expanded")
-        plt.plot(idx, trainer.loss_val[i], label="Validation Loss fastText")
+        plt.plot(idx, trainer.loss_val[i], label="Validation Loss")
         plt.plot(idx, trainer_ex.loss_val[i], label="Validation Loss expanded")
         plt.legend()
         plt.savefig(path / f"Loss{i}.png")
@@ -149,8 +149,8 @@ if __name__ == "__main__":
     score = accuracy_score(y_test.values, np.argmax(test_preds, axis=1))
     f1 = f1_score(
         y_test.values, np.argmax(test_preds, axis=1), average="macro")
-    logger.info(f"Test Acc fastText: {score}")
-    logger.info(f"Test f1 fastText: {f1}")
+    logger.info(f"Test Acc: {score}")
+    logger.info(f"Test f1: {f1}")
 
     test_preds = trainer_ex.predict(X_test)
     score = accuracy_score(y_test.values, np.argmax(test_preds, axis=1))
