@@ -159,3 +159,20 @@ class NNTrainer(Trainer):
                 valid_preds[i * self.val_batch:(i + 1) * self.
                             val_batch, :] = F.softmax(y_pred).cpu().numpy()
         return valid_preds, avg_val_loss
+
+    def predict(self, X_test):
+        X_tensor = torch.tensor(X_test, dtype=torch.long).to(self.device)
+        dataset = torch.utils.data.TensorDataset(X_tensor)
+        loader = torch.utils.data.DataLoader(
+            dataset, batch_size=128, shuffle=False)
+        test_preds = np.zeros((X_test.shape[0], 9))
+        for path in self.path.iterdir():
+            model = self.model(**self.kwargs)
+            model.load_state_dict(torch.load(path))
+            model.to(self.device)
+            temp = np.zeros_like(test_preds)
+            for i, (x_batch, ) in loader:
+                pred = model(x_batch).detach()
+                temp[i * 128:(i + 1) * 128] = F.softmax(pred).cpu().numpy()
+                test_preds += temp / self.n_splits
+        return test_preds

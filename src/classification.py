@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 
 from pathlib import Path
 from gensim.models import KeyedVectors
+from sklearn.metrics import accuracy_score, f1_score
 
 if __name__ == "__main__":
     sys.path.append("../..")
@@ -41,11 +42,13 @@ if __name__ == "__main__":
     train, test = loader.load()
     X = train["tokenized"]
     X_test = test["tokenized"]
+
     y = train["label"]
     y_test = test["label"]
 
     with timer("Convert to sequence", logger):
-        X, X_test, word_index = to_sequence(X, X_test, max_features=80000)
+        X, X_test, word_index = to_sequence(
+            X, X_test, max_features=95000, maxlen=1200)
 
     with timer("Load embedding", logger):
         if args.target_embedding:
@@ -57,12 +60,12 @@ if __name__ == "__main__":
                 binary=check_format(args.target_embedding))
             expanded_emb = embedding_expander(source, target, logger)
             embedding_matrix, in_base, in_expanded = prepare_emb(
-                word_index, target, expanded_emb, 80000)
+                word_index, target, expanded_emb, 95000)
             logger.info(f"In base embedding: {in_base}")
             logger.info(f"In expanded embedding: {in_expanded}")
         else:
             embedding_matrix, in_base = load_w2v(word_index,
-                                                 args.source_embedding, 80000)
+                                                 args.source_embedding, 95000)
             logger.info(f"In base embedding: {in_base}")
     trainer = NNTrainer(
         NeuralNet,
@@ -72,7 +75,7 @@ if __name__ == "__main__":
             "embedding_matrix": embedding_matrix,
             "n_classes": 9,
             "hidden_size": 64,
-            "maxlen": 150,
+            "maxlen": 1200,
             "linear_size": 100,
             "n_attention": 30
         })
@@ -88,3 +91,9 @@ if __name__ == "__main__":
         plt.plot(idx, trainer.f1s[i], label="F1")
         plt.legend()
         plt.savefig(path / f"score{i}.png")
+
+    test_preds = trainer.predict(X_test)
+    score = accuracy_score(y_test.values, np.argmax(test_preds, axis=1))
+    f1 = f1_score(y_test.values, np.argmax(test_preds, axis=1))
+    logger.info(f"Test Acc: {score}")
+    logger.info(f"Test f1: {f1}")
