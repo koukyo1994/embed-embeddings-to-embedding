@@ -42,19 +42,24 @@ def prepare_emb(word_index, base_w2v, expanded_w2v, max_features=95000):
     n_words = min(max_features, len(word_index))
     embedding_matrix = np.random.normal(emb_mean, emb_std,
                                         (n_words + 1, embed_size))
+    in_base = 0
+    in_expanded = 0
     for word, i in word_index.items():
         if i >= max_features:
             continue
         try:
             embedding_vector = base_w2v.get_vector(word)
             embedding_matrix[i] = embedding_vector
+            in_base += 1
         except KeyError:
             try:
                 embedding_vector = expanded_w2v[word]
                 embedding_matrix[i] = embedding_vector
+                in_expanded += 1
             except KeyError:
                 pass
-    return embedding_matrix
+
+    return embedding_matrix, in_base, in_expanded
 
 
 def load_w2v(word_index, filepath, max_features=95000):
@@ -72,13 +77,15 @@ def load_w2v(word_index, filepath, max_features=95000):
 
     n_words = min(max_features, len(word_index))
     embedding_matrix = np.random.normal(emb_mean, emb_std,
-                                        (n_words, embed_size))
+                                        (n_words + 1, embed_size))
+    in_base = 0
     for word, i in word_index.items():
         if i >= max_features:
             continue
         try:
             embedding_vector = embeddings_dict.get_vector(word)
             embedding_matrix[i] = embedding_vector
+            in_base += 1
         except KeyError:
             pass
-    return embedding_matrix
+    return embedding_matrix, in_base

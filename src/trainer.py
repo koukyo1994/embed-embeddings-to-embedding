@@ -77,6 +77,8 @@ class NNTrainer(Trainer):
         path = Path(f"bin/{self.tag}")
         path.mkdir(exist_ok=True, parents=True)
         self.path = path
+        self.scores = {}
+        self.f1s = {}
 
     def _fit(self, X_train, y_train, n_epochs=50, eval_set=()):
         seed_torch()
@@ -102,6 +104,8 @@ class NNTrainer(Trainer):
             scheduler = optim.lr_scheduler.CosineAnnealingLR(
                 optimizer, T_max=n_epochs)
         best_score = -np.inf
+        epoch_score = []
+        epoch_f1 = []
 
         for epoch in range(n_epochs):
             with timer(f"Epoch {epoch+1}/{n_epochs}", self.logger):
@@ -123,6 +127,8 @@ class NNTrainer(Trainer):
                     eval_set[1],
                     np.argmax(valid_preds, axis=1),
                     average="macro")
+                epoch_score.append(score)
+                epoch_f1.append(f1)
             self.logger.info(
                 f"loss: {avg_loss:.4f} val_loss: {avg_val_loss:.4f}")
             self.logger.info(f"val_acc: {score} val_f1: {f1}")
@@ -136,6 +142,8 @@ class NNTrainer(Trainer):
         model.load_state_dict(torch.load(self.path / f"best{self.fold}.pt"))
         valid_preds, avg_val_loss = self._val(valid_loader, model)
         self.logger.info(f"Validation loss: {avg_val_loss}")
+        self.scores[self.fold] = epoch_score
+        self.f1s[self.fold] = epoch_f1
         return valid_preds
 
     def _val(self, loader, model):

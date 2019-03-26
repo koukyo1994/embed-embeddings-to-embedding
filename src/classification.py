@@ -1,6 +1,12 @@
 import sys
 import argparse
 
+import matplotlib
+matplotlib.use("agg")
+import numpy as np
+import matplotlib.pyplot as plt
+
+from pathlib import Path
 from gensim.models import KeyedVectors
 
 if __name__ == "__main__":
@@ -50,11 +56,14 @@ if __name__ == "__main__":
                 args.target_embedding,
                 binary=check_format(args.target_embedding))
             expanded_emb = embedding_expander(source, target, logger)
-            embedding_matrix = prepare_emb(word_index, target, expanded_emb,
-                                           80000)
+            embedding_matrix, in_base, in_expanded = prepare_emb(
+                word_index, target, expanded_emb, 80000)
+            logger.info(f"In base embedding: {in_base}")
+            logger.info(f"In expanded embedding: {in_expanded}")
         else:
-            embedding_matrix = load_w2v(word_index, args.source_embedding,
-                                        80000)
+            embedding_matrix, in_base = load_w2v(word_index,
+                                                 args.source_embedding, 80000)
+            logger.info(f"In base embedding: {in_base}")
     trainer = NNTrainer(
         NeuralNet,
         logger,
@@ -68,3 +77,14 @@ if __name__ == "__main__":
             "n_attention": 30
         })
     trainer.fit(X, y.values, 30)
+
+    path = Path(f"figure/{trainer.tag}")
+    path.mkdir(parents=True, exist_ok=True)
+
+    idx = np.arange(len(trainer.f1s[0]))
+    for i in range(trainer.n_splits):
+        plt.figure()
+        plt.plot(idx, trainer.scores[i], label="Accuracy")
+        plt.plot(idx, trainer.f1s[i], label="F1")
+        plt.legend()
+        plt.savefig(path / f"score{i}.png")
