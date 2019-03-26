@@ -171,7 +171,7 @@ class NNTrainer(Trainer):
             model.load_state_dict(torch.load(path))
             model.to(self.device)
             temp = np.zeros_like(test_preds)
-            for i, (x_batch, ) in loader:
+            for i, (x_batch, ) in enumerate(loader):
                 pred = model(x_batch).detach()
                 temp[i * 128:(i + 1) * 128] = F.softmax(pred).cpu().numpy()
                 test_preds += temp / self.n_splits
