@@ -107,7 +107,7 @@ if __name__ == "__main__":
             "linear_size": 100,
             "n_attention": 50
         })
-    trainer.fit(X, y.values, 30)
+    trainer.fit(X, y.values, 15)
 
     # with Expanded Words
     trainer_ex = NNTrainer(
@@ -122,7 +122,7 @@ if __name__ == "__main__":
             "linear_size": 100,
             "n_attention": 50
         })
-    trainer_ex.fit(X, y.values, 20)
+    trainer_ex.fit(X, y.values, 15)
 
     path = Path(f"figure/{trainer.tag}")
     path.mkdir(parents=True, exist_ok=True)
